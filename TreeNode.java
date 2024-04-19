@@ -1,8 +1,3 @@
-// TODO:
-// inorder
-// cheap insert, remove?
-
-
 public class TreeNode<T>
 {
     private T element;
@@ -51,19 +46,26 @@ public class TreeNode<T>
         }
         else if (this.left == null && this.right != null)
         {
-            return this.getElement().toString() + " "   // Self
-            + this.getRight().preorder();       // Right
+            return this.getElement().toString()
+            
+            + this.getRight().preorder()
+            + " ";   
         }
         else if (this.left != null && this.right == null)
         {
-            return this.getElement().toString() + " "   // Self
-            + this.getLeft().preorder();     // Left
+            return this.getElement().toString()  
+            + " "
+            + this.getLeft().preorder()
+            + " "; 
         }
         else
         {
-            return this.getElement().toString() + " "   // Self
-            + this.getLeft().preorder() + " "     // Left
-            + this.getRight().preorder();       // Right
+            return this.getElement().toString() 
+            + " "  
+            + this.getLeft().preorder()
+            
+            + this.getRight().preorder()      
+            + " ";
         }
        
         
@@ -77,18 +79,18 @@ public class TreeNode<T>
         }
         else if (this.left == null && this.right != null)
         {
-            return this.getRight().postorder() + " "   // Right
+            return this.getRight().postorder()  // Right
             + this.getElement().toString();       // Self
         }
         else if (this.left != null && this.right == null)
         {
-            return this.getLeft().postorder() + " "   // Left
+            return this.getLeft().postorder()  // Left
             + this.getElement().toString();      // Self
         }
         else
         {
-            return this.getLeft().postorder() + " "   // Self
-            + this.getRight().postorder() + " "     // Left
+            return this.getLeft().postorder()  // Self
+            + this.getRight().postorder()     // Left
             + this.getElement().toString();       // Right
         }
        
@@ -122,31 +124,92 @@ public class TreeNode<T>
 
     public void insertLeft(TreeNode<T> newNode) //O(1)
     {
-        this.setLeft(newNode);
+        if (left == null)
+        {
+            this.setLeft(newNode);
+        }
     }
+
     public void insertRight(TreeNode<T> newNode) //O(1)
     {
-        this.setRight(newNode);
+        if (right == null)
+        {
+            this.setRight(newNode);
+        }
+       
     }
 
-    public void insert(TreeNode<T> newNode)
+    public boolean isIn(T target) //O(n)
     {
-        //TODO (height has yet to be made, will fix in class)
-        /*
-        if (this.getLeft().height() <= this.getRight().height())
+        if (this.getElement().equals(target)) 
         {
-            this.getLeft().insert(element);
+            return true;
         }
-        else if (this.getLeft().height() > this.getRight().height())
+        else if (this.left != null && this.right == null) // right is null
         {
-            this.getRight().insert(element);
+            return false || this.left.isIn(target);
         }
-        */
+        else if (this.left == null && this.right != null) // left is null
+        {
+            return false || this.right.isIn(target);
+        }
+        else if (this.left == null && this.right == null) // both is null
+        {
+            return false;
+        }
+        else    // return false or look in left or right decendents for the target using recursion
+        {
+            return false || this.left.isIn(target) || this.right.isIn(target);
+        }
+        
     }
 
-    public void remove()
+    public int height() //O(n) 
     {
+        if (this.left == null && this.right == null) // no height
+        {
+            return 0;
+        }
+        else if (this.left != null && this.right == null)
+        {
+            return 1 + this.left.height(); // right height is -1 so its not included
+        }
+        else if (this.left == null && this.right != null)
+        {
+            return 1 + this.right.height(); // left height is -1 so its not included
+        }
+        else // "one plus the maximum of the height of the two decendents"
+        {
+            return 1 + Math.max(this.left.height(), this.right.height());
+        }
+    }
 
+    public void insert(TreeNode<T> newNode) // O(n log n) "nlogn algorithm 
+    {
+        
+        if (this.left == null && this.right == null)
+        {
+            this.insertLeft(newNode); // inserts in left decendent first if both are empty 
+        }
+        else if (this.left == null && this.right != null)
+        {
+            this.insertLeft(newNode);
+        }
+        else if (this.left != null && this.right == null)
+        {
+            this.insertRight(newNode);
+        }
+        else // both are not null // inserting recursivley
+        {
+            if (this.left.height() > this.right.height())
+            {
+                this.right.insert(newNode);
+            }
+            else // this.left.height() <= this.right.height()
+            {
+                this.left.insert(newNode);
+            }
+        }
     }
 
     // toString
