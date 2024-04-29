@@ -1,92 +1,45 @@
-import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
 
 public class MorseTree
 {
     public TreeNode<String> root;
 
+    // normal methods
     public MorseTree()
     {
         root = null;
     }
 
-    // make tree from file (somewhat done)
-    public void treePopulate() // add: (String fileName) if you wanna switch back to file IO method 
+    public void treePopulate() 
     {
-        root = new TreeNode<>("");
+        root = new TreeNode<>("_");
+        root.insertLeft(new TreeNode<String>("e"));
+        root.insertRight(new TreeNode<String>("t"));
+        root.getLeft().insertLeft(new TreeNode<String>("i"));
+        root.getLeft().insertRight(new TreeNode<String>("a"));
+        root.getRight().insertLeft(new TreeNode<String>("n"));
+        root.getRight().insertRight(new TreeNode<String>("m"));
+        
+        root.getLeft().getLeft().insertLeft(new TreeNode<String>("s"));
+        root.getLeft().getLeft().insertRight(new TreeNode<String>("u"));
+        root.getLeft().getRight().insertLeft(new TreeNode<String>("r"));
+        root.getLeft().getRight().insertRight(new TreeNode<String>("w"));
+        root.getRight().getLeft().insertLeft(new TreeNode<String>("d"));
+        root.getRight().getLeft().insertRight(new TreeNode<String>("k"));
+        root.getRight().getRight().insertLeft(new TreeNode<String>("g"));
+        root.getRight().getRight().insertRight(new TreeNode<String>("o"));
 
-        codeInsert(root, "e", "o"); 
-        codeInsert(root, "t", "-");
-        codeInsert(root, "i", "o o");
-        codeInsert(root, "a", "o -");
-        codeInsert(root, "n", "- o");
-        codeInsert(root, "m", "- -");
-        codeInsert(root, "s", "o o o");
-        codeInsert(root, "u", "o o -");
-        codeInsert(root, "r", "o - o");
-        codeInsert(root, "w", "o - -");
-        codeInsert(root, "d", "- o o");
-        codeInsert(root, "k", "- o -");
-        codeInsert(root, "g", "- - o");
-        codeInsert(root, "h", "o o o o");
-        codeInsert(root, "v", "o o o -");
-        codeInsert(root, "f", "o o - o");
-        codeInsert(root, "l", "o - o o");
-        codeInsert(root, "p", "o - - o");
-        codeInsert(root, "j", "o - - -");
-        codeInsert(root, "b", "- o o o");
-        codeInsert(root, "x", "- o o -");
-        codeInsert(root, "c", "- o - o");
-        codeInsert(root, "y", "- o - -");
-        codeInsert(root, "z", "- - o o");
-        codeInsert(root, "q", "- - o -");
-
-
-        // file IO method (wasnt really vibin with this, may come back to it later)
-        /*
-        try 
-        {
-            File file = new File(fileName);
-            Scanner scan = new Scanner(file);
-
-            root = new TreeNode<>("");
-
-            while (scan.hasNextLine())
-            {
-                String line = scan.nextLine();
-                String[] parts = line.split(" ");
-                String letter = parts[0];
-                String code = parts[1];
-
-                codeInsert(root, letter, code, 0);
-            }
-            scan.close();
-        }
-        catch (FileNotFoundException e)
-        {
-            System.out.println("File not found: " + fileName);
-        }
-        */
-    }
-
-    public void codeInsert(TreeNode<String> node, String letter, String code)
-    {
-       for (int i = 0; i < code.length(); i++)
-       {
-            char c = code.charAt(i);
-            if (c == 'o')
-            {
-                node.insertLeft(new TreeNode<>("")); // fucking up the print order/format
-                node = node.getLeft();
-            }
-            else if (c == '-')
-            {
-                node.insertRight(new TreeNode<>("")); // also fucking up the print order/format
-                node = node.getRight();
-            }
-       }
-       node.insert(new TreeNode<>(letter));
+        root.getLeft().getLeft().getLeft().insertLeft(new TreeNode<String>("h"));
+        root.getLeft().getLeft().getLeft().insertRight(new TreeNode<String>("v"));
+        root.getLeft().getLeft().getRight().insertLeft(new TreeNode<String>("f"));
+        root.getLeft().getLeft().getRight().insertRight(new TreeNode<String>("l"));
+        root.getLeft().getRight().getLeft().insertLeft(new TreeNode<String>("p"));
+        root.getLeft().getRight().getLeft().insertRight(new TreeNode<String>("j"));
+        root.getLeft().getRight().getRight().insertLeft(new TreeNode<String>("b"));
+        root.getLeft().getRight().getRight().insertRight(new TreeNode<String>("x"));
+        root.getRight().getLeft().getLeft().insertLeft(new TreeNode<String>("c"));
+        root.getRight().getLeft().getLeft().insertRight(new TreeNode<String>("y"));
+        root.getRight().getLeft().getRight().insertLeft(new TreeNode<String>("z"));
+        root.getRight().getLeft().getRight().insertRight(new TreeNode<String>("q"));
     }
     
     public String preOrderMorse()
@@ -98,9 +51,131 @@ public class MorseTree
     {
         return root.postorder();
     }
-    // unfinished
-    public String englishToMorse(String text)
+
+    public String englishToMorse(String text) 
     {
-       return "";
+        StringBuilder morse = new StringBuilder();
+        String[] words = text.toLowerCase().split("\\s+");
+        for (String word : words) 
+        {
+            for (int i = 0; i < word.length(); i++) 
+            {
+                char c = word.charAt(i);
+                if (Character.isLetter(c)) 
+                {
+                    String letter = String.valueOf(c);
+                    String path = findNode(root, letter, "");
+                    morse.append(path);
+                    if (i < word.length()) 
+                    {
+                        morse.append("|");
+                    }
+                }
+            }
+            
+        }
+        return morse.toString().trim();
+    }
+
+    public String morseToEnglish(String morse)
+    {
+        StringBuilder sb = new StringBuilder();
+        String[] codes = morse.split("\\|");
+        for (String code : codes)
+        {
+            String english = getEnglish(code);
+            if (english != null) 
+            {
+                sb.append(english);
+            }
+        }
+        return sb.toString();
+    }
+
+
+    // helper methods
+    public String findNode(TreeNode<String> node, String letter, String path)
+    {
+       if (node == null)
+       {
+            return "";
+       }
+       else if(node.getElement().equals(letter))
+       {
+            return path;
+       }
+       else
+        {
+            return "" + findNode(node.getLeft(), letter, path + "o") + findNode(node.getRight(), letter, path + "-");
+        }
+    }
+    
+    public String getMorseCode(TreeNode<String> node)
+    {
+        if (node == null)
+        {
+            return "";
+        }
+        StringBuilder code = new StringBuilder();
+        Traverse(node, code);
+        return code.toString();
+    }
+
+    public void Traverse(TreeNode<String> node, StringBuilder code)
+    {
+        if (node.getLeft() != null)
+        {
+            //code.append("o");
+            Traverse(node.getLeft(), code);
+        }
+        if (node.getRight() != null)
+        {
+            //code.append("-");
+            Traverse(node.getRight(), code);
+        }
+    }
+
+    public TreeNode<String> findNodeByCode(TreeNode<String> node, String code)
+    {
+        if(node == null || code.isEmpty())
+        {
+            return null;
+            
+        }
+        if (code.length() == 1 && node.getElement() != "")
+        {
+            return node;
+        }
+       
+        char c = code.charAt(0);
+        String codeRemaining = code.substring(1);
+
+        if (c == 'o')
+        {
+            return findNodeByCode(node.getLeft(), codeRemaining);
+        }
+        else if ( c == '-')
+        {
+            return findNodeByCode(node.getRight(), codeRemaining);
+        }
+
+        return null;
+    }
+
+    public String getEnglish(String code) {
+        TreeNode<String> currentNode = root;
+        for (char symbol : code.toCharArray()) {
+            if (symbol == 'o') {
+                currentNode = currentNode.getLeft();
+            } else if (symbol == '-') {
+                currentNode = currentNode.getRight();
+            }
+            
+            if (currentNode == null) {
+                return null;
+            }
+        }
+        
+        return currentNode.getElement();
     }
 }
